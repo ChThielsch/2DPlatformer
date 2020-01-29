@@ -21,6 +21,11 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private InputMaster _controls;
 
+    /// <summary>
+    /// Reference to the Animator script created by the InputSystemAsset
+    /// </summary>
+    private Animator _animator;
+
     #region(UnityFunctions)
     private void OnValidate()
     {
@@ -31,6 +36,7 @@ public class PlayerMovement : MonoBehaviour
     {
         _controls = new InputMaster();
         _controller = gameObject.GetComponent(typeof(CharacterController2D)) as CharacterController2D;
+        _animator = gameObject.GetComponent(typeof(Animator)) as Animator;
 
 
         _controls.Player.Movement.performed += context => Move(context.ReadValue<float>());
@@ -61,11 +67,15 @@ public class PlayerMovement : MonoBehaviour
     void Move(float direction)
     {
         _horizontalMove = direction * runSpeed;
+
+        //Using the absolute so given value is never negative
+        _animator.SetFloat("Speed", Mathf.Abs(_horizontalMove));
     }
 
     void Jump()
     {
         _jump = true;
+        _animator.SetBool("IsJumping", true);
     }
 
     void Crouch()
@@ -80,6 +90,17 @@ public class PlayerMovement : MonoBehaviour
             //Crouch
             _crouch = true;
         }
+    }
+
+    public void OnLanding()
+    {
+        _animator.SetBool("IsJumping", false);
+    }
+
+
+    public void OnCrouching(bool isCrouching)
+    {
+        _animator.SetBool("IsCrouching", isCrouching);
     }
     #endregion
 }
